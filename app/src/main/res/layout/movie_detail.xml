@@ -1,0 +1,62 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.portfolio.vic.popmovies.MovieDetailFragment">
+
+    <TextView
+        android:id="@+id/movie_detail"
+        style="?android:attr/textAppearanceLarge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/holo_blue_dark"
+        android:padding="16dp"
+        android:textColor="@android:color/white"
+        android:textIsSelectable="true" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp">
+
+        <ImageView
+            android:layout_margin="10dp"
+            android:id="@+id/photoIV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/yearTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/photoIV" />
+
+
+        <TextView
+            android:id="@+id/voteTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/yearTV"
+            android:layout_toRightOf="@+id/photoIV" />
+
+        <Button
+            android:layout_below="@+id/voteTV"
+            android:id="@+id/fabBT"
+            android:textColor="@android:color/darker_gray"
+            android:background="@android:color/holo_blue_bright"
+            android:padding="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/photoIV"
+            android:text="@string/mark_as_favorite" />
+    </RelativeLayout>
+
+    <TextView
+        android:layout_margin="10dp"
+        android:id="@+id/descriptionTV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>
