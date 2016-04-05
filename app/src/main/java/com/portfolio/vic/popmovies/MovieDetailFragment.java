@@ -52,8 +52,17 @@ public class MovieDetailFragment extends Fragment {
 
     @Override
     public void startActivity(Intent intent) {
+
+        super.startActivity(intent);
+
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.movie_detail, container, false);
         if (getArguments().containsKey(ARG_ITEM_ID)) {
-        id = getArguments().getLong(ARG_ITEM_ID);
+            id = getArguments().getLong(ARG_ITEM_ID);
         }
         movie = SQLite.select()
                 .from(Movie.class)
@@ -65,17 +74,9 @@ public class MovieDetailFragment extends Fragment {
         if (appBarLayout != null && movie!= null) {
             appBarLayout.setTitle(movie.getTitle());
         }
-        super.startActivity(intent);
-
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.movie_detail, container, false);
-
         // Show the dummy content as text in a TextView.
         if (movie != null) {
+            Log.e(this.toString(),"deb");
             ((TextView) rootView.findViewById(R.id.movie_detail)).setText(movie.getTitle());
             ImageView image = (ImageView) rootView.findViewById(R.id.photoIV);
             Picasso.with(getContext())
@@ -86,6 +87,7 @@ public class MovieDetailFragment extends Fragment {
             ((TextView) rootView.findViewById(R.id.yearTV)).setText(movie.getRelease_date());
             ((TextView) rootView.findViewById(R.id.voteTV)).setText(String.valueOf(movie.getVote_average()));
             ((TextView) rootView.findViewById(R.id.descriptionTV)).setText(movie.getOverview());
+
         }
 
         return rootView;

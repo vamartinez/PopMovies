@@ -4,19 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,18 +18,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 
 import com.portfolio.vic.popmovies.db.*;
-import com.portfolio.vic.popmovies.dummy.DummyContent;
 import com.raizlabs.android.dbflow.list.FlowCursorList;
-import com.raizlabs.android.dbflow.list.FlowQueryList;
 import com.raizlabs.android.dbflow.runtime.FlowContentObserver;
 import com.raizlabs.android.dbflow.sql.language.Delete;
 import com.raizlabs.android.dbflow.sql.language.SQLCondition;
-import com.raizlabs.android.dbflow.sql.language.SQLite;
 import com.raizlabs.android.dbflow.structure.BaseModel;
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.picasso.Picasso;
@@ -58,11 +47,12 @@ public class MovieListActivity extends AppCompatActivity {
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
      */
-    private boolean mTwoPane;
+    private static boolean mTwoPane;
     MovieService movieService;
     FlowContentObserver observer;
     List<Movie> movieList;
     private String prevPreference;
+    private Movie movieInDetail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,7 +75,8 @@ public class MovieListActivity extends AppCompatActivity {
         }
         GridLayoutManager lLayout = new GridLayoutManager(this, countColums);
         recyclerView.setLayoutManager(lLayout);
-        getMovies();
+        getMovies(savedInstanceState);
+
     }
 
     @Override
@@ -94,7 +85,7 @@ public class MovieListActivity extends AppCompatActivity {
 
     }
 
-    private void getMovies() {
+    private void getMovies(final Bundle savedInstanceState) {
         if (movieService == null)
             movieService = new MovieService(this);
         if (observer == null)
@@ -103,7 +94,7 @@ public class MovieListActivity extends AppCompatActivity {
         FlowContentObserver.OnModelStateChangedListener modelChangeListener = new FlowContentObserver.OnModelStateChangedListener() {
             @Override
             public void onModelStateChanged(@Nullable Class<? extends Model> table, BaseModel.Action action, @NonNull SQLCondition[] primaryKeyValues) {
-                reloadList();
+                reloadList(savedInstanceState);
             }
         };
         observer.endTransactionAndNotify();
@@ -112,15 +103,22 @@ public class MovieListActivity extends AppCompatActivity {
         String genPref = sharedPref.getString(SettingsActivity.KEY_PREF_GENERAL, "");
         this.prevPreference = genPref;
         movieService.getMovies(observer, genPref);
+
     }
 
-    private void reloadList() {
+    private void reloadList(final Bundle savedInstanceState) {
         this.runOnUiThread(new Runnable() {
             public void run() {
                 RecyclerView recyclerView = (RecyclerView) findViewById(R.id.movie_list);
                 setupRecyclerView(recyclerView);
                 if ((recyclerView) != null) {
                     recyclerView.getAdapter().notifyDataSetChanged();
+                    if (savedInstanceState != null) {
+                        long mCurrentMovie = savedInstanceState.getLong(MovieDetailFragment.ARG_ITEM_ID);
+                        if (mCurrentMovie > 0L)
+                            ((SimpleItemRecyclerViewAdapter) recyclerView.getAdapter()).loadDetail(mCurrentMovie);
+                        savedInstanceState.putLong(MovieDetailFragment.ARG_ITEM_ID, -1L);
+                    }
                 }
             }
         });
@@ -159,22 +157,27 @@ public class MovieListActivity extends AppCompatActivity {
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mTwoPane) {
-                        Bundle arguments = new Bundle();
-                        arguments.putLong(MovieDetailFragment.ARG_ITEM_ID, movie.getId());
-                        MovieDetailFragment fragment = new MovieDetailFragment();
-                        fragment.setArguments(arguments);
-                        getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.movie_detail_container, fragment)
-                                .commit();
-                    } else {
-                        Context context = v.getContext();
-                        Intent intent = new Intent(context, MovieDetailActivity.class);
-                        intent.putExtra(MovieDetailFragment.ARG_ITEM_ID, movie.getId());
-                        context.startActivity(intent);
-                    }
+                    movieInDetail = movie;
+                    loadDetail(movie.getId());
                 }
             });
+        }
+
+        private void loadDetail(long movieId) {
+            if (findViewById(R.id.movie_detail_container) != null) {
+                Bundle arguments = new Bundle();
+                arguments.putLong(MovieDetailFragment.ARG_ITEM_ID, movieId);
+                MovieDetailFragment fragment = new MovieDetailFragment();
+                fragment.setArguments(arguments);
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.movie_detail_container, fragment)
+                        .commit();
+            } else {
+                Intent intent = new Intent(getApplicationContext(), MovieDetailActivity.class);
+                intent.putExtra(MovieDetailFragment.ARG_ITEM_ID, movieId);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getApplicationContext().startActivity(intent);
+            }
         }
 
         @Override
@@ -224,10 +227,17 @@ public class MovieListActivity extends AppCompatActivity {
     protected void onResume() {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         String genPref = sharedPref.getString(SettingsActivity.KEY_PREF_GENERAL, "");
-        if(!genPref.equals(prevPreference)){
+        if (!genPref.equals(prevPreference)) {
             new Delete().from(Movie.class).where().query();
             movieService.getMovies(observer, genPref);
         }
         super.onResume();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        if (movieInDetail != null)
+            savedInstanceState.putLong(MovieDetailFragment.ARG_ITEM_ID, movieInDetail.getId());
+        super.onSaveInstanceState(savedInstanceState);
     }
 }

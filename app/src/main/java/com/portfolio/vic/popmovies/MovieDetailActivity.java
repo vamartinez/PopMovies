@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
@@ -18,6 +19,8 @@ import android.view.MenuItem;
  * in a {@link MovieListActivity}.
  */
 public class MovieDetailActivity extends AppCompatActivity {
+
+    private long moviId = -1l;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,16 +46,21 @@ public class MovieDetailActivity extends AppCompatActivity {
         // http://developer.android.com/guide/components/fragments.html
         //
         if (savedInstanceState == null) {
-            // Create the detail fragment and add it to the activity
-            // using a fragment transaction.
+            moviId = getIntent().getLongExtra(MovieDetailFragment.ARG_ITEM_ID, -1l);
+        } else {
+            moviId = savedInstanceState.getInt(MovieDetailFragment.ARG_ITEM_ID);
+        }
+
+        Log.e(this.toString(), moviId + "sa");
+        if (moviId > 1L) {
             Bundle arguments = new Bundle();
-            arguments.putLong(MovieDetailFragment.ARG_ITEM_ID,
-                    getIntent().getLongExtra(MovieDetailFragment.ARG_ITEM_ID,0l));
+            arguments.putLong(MovieDetailFragment.ARG_ITEM_ID, moviId);
             MovieDetailFragment fragment = new MovieDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.movie_detail_container, fragment)
                     .commit();
+
         }
     }
 
@@ -75,6 +83,10 @@ public class MovieDetailActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+
+        if (moviId != -1l)
+            outState.putLong(MovieDetailFragment.ARG_ITEM_ID, moviId);
+
         super.onSaveInstanceState(outState);
     }
 
