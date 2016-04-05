@@ -1,6 +1,8 @@
 package com.portfolio.vic.popmovies;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -46,24 +48,25 @@ public class MovieDetailFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
 
+    @Override
+    public void startActivity(Intent intent) {
         if (getArguments().containsKey(ARG_ITEM_ID)) {
-            // Load the dummy content specified by the fragment
-            // arguments. In a real-world scenario, use a Loader
-            // to load content from a content provider.
-            id = getArguments().getLong(ARG_ITEM_ID);
-            Log.e(this.toString(),id+"es");
-             movie = SQLite.select()
-                    .from(Movie.class)
-                    .where(Movie_Table.id.eq(id))
-                    .querySingle();
-
-            Activity activity = this.getActivity();
-            CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
-            if (appBarLayout != null && movie!= null) {
-                appBarLayout.setTitle(movie.getTitle());
-            }
+        id = getArguments().getLong(ARG_ITEM_ID);
         }
+        movie = SQLite.select()
+                .from(Movie.class)
+                .where(Movie_Table.id.eq(id))
+                .querySingle();
+
+        Activity activity = this.getActivity();
+        CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
+        if (appBarLayout != null && movie!= null) {
+            appBarLayout.setTitle(movie.getTitle());
+        }
+        super.startActivity(intent);
+
     }
 
     @Override
@@ -75,7 +78,11 @@ public class MovieDetailFragment extends Fragment {
         if (movie != null) {
             ((TextView) rootView.findViewById(R.id.movie_detail)).setText(movie.getTitle());
             ImageView image = (ImageView) rootView.findViewById(R.id.photoIV);
-            Picasso.with(getContext()).load(movie.getImageFullPath(getContext())).into(image);
+            Picasso.with(getContext())
+                    .load(movie.getImageFullPath(getContext()))
+                    .placeholder(R.drawable.ic_sync_black_24dp)
+                    .error(R.drawable.ic_error)
+                    .into(image);
             ((TextView) rootView.findViewById(R.id.yearTV)).setText(movie.getRelease_date());
             ((TextView) rootView.findViewById(R.id.voteTV)).setText(String.valueOf(movie.getVote_average()));
             ((TextView) rootView.findViewById(R.id.descriptionTV)).setText(movie.getOverview());

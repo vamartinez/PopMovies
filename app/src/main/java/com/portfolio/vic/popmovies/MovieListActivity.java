@@ -33,6 +33,7 @@ import com.portfolio.vic.popmovies.dummy.DummyContent;
 import com.raizlabs.android.dbflow.list.FlowCursorList;
 import com.raizlabs.android.dbflow.list.FlowQueryList;
 import com.raizlabs.android.dbflow.runtime.FlowContentObserver;
+import com.raizlabs.android.dbflow.sql.language.Delete;
 import com.raizlabs.android.dbflow.sql.language.SQLCondition;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
 import com.raizlabs.android.dbflow.structure.BaseModel;
@@ -136,7 +137,8 @@ public class MovieListActivity extends AppCompatActivity {
         private FlowCursorList<Movie> mFlowCursorList;
 
         public SimpleItemRecyclerViewAdapter() {
-            mFlowCursorList = new FlowCursorList<>(true, SQLite.select().from(Movie.class));
+            if (mFlowCursorList == null)
+                mFlowCursorList = new FlowCursorList<>(true, Movie.class);
         }
 
         @Override
@@ -149,7 +151,11 @@ public class MovieListActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
             final Movie movie = mFlowCursorList.getItem(position);
-            Picasso.with(getApplicationContext()).load(movie.getImageFullPath(getApplicationContext())).into(holder.imageIV);
+            Picasso.with(getApplicationContext())
+                    .load(movie.getImageFullPath(getApplicationContext()))
+                    .placeholder(R.drawable.ic_sync_black_24dp)
+                    .error(R.drawable.ic_error)
+                    .into(holder.imageIV);
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -187,6 +193,7 @@ public class MovieListActivity extends AppCompatActivity {
             }
 
         }
+
     }
 
     @Override
@@ -211,5 +218,16 @@ public class MovieListActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        String genPref = sharedPref.getString(SettingsActivity.KEY_PREF_GENERAL, "");
+        if(!genPref.equals(prevPreference)){
+            new Delete().from(Movie.class).where().query();
+            movieService.getMovies(observer, genPref);
+        }
+        super.onResume();
     }
 }

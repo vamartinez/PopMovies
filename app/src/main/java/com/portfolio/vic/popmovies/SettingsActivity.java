@@ -2,6 +2,7 @@ package com.portfolio.vic.popmovies;
 
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -36,6 +37,7 @@ import java.util.List;
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
     public static final String KEY_PREF_GENERAL = "general_list";
+    public static Activity activity;
     /**
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
@@ -95,6 +97,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
+        activity = this;
     }
 
     /**
@@ -105,7 +108,14 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         if (actionBar != null) {
             // Show the Up button in the action bar.
             actionBar.setDisplayHomeAsUpEnabled(true);
+
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        activity.finish();
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -151,10 +161,17 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         public boolean onOptionsItemSelected(MenuItem item) {
             int id = item.getItemId();
             if (id == android.R.id.home) {
-                startActivity(new Intent(getActivity(), MovieListActivity.class));
+                Log.e("sdfsd",activity.toString());
+                if (activity != null){
+                    Intent returnIntent = new Intent();
+                    activity.setResult(Activity.RESULT_OK, returnIntent);
+                    activity.finish();
+                }
                 return true;
             }
             return super.onOptionsItemSelected(item);
         }
     }
+
+
 }
