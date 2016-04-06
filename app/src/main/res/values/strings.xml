@@ -23,13 +23,18 @@
     <string name="pref_default_display_name">John Smith</string>
 
     <string name="pref_title_add_friends_to_messages">Order</string>
+    <string name="show_trailer">show Trailer</string>
+    <string name="youtube_com">https://www.youtube.com/watch?v=</string>
+    <string name="remove_favorite">REMOVE OF FAVORITE</string>
     <string-array name="pref_example_list_titles">
         <item>Most popular</item>
         <item>Top rated</item>
+        <item>Favorites</item>
     </string-array>
     <string-array name="pref_example_list_values">
         <item>0</item>
         <item>1</item>
+        <item>2</item>
     </string-array>
 
 </resources>

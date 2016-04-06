@@ -13,6 +13,8 @@ import com.raizlabs.android.dbflow.config.FlowManager;
 public class MoviApp extends Application {
     private final static String MOVIE_POPULAR = "3/movie/popular";
     private final static String MOVIE_TOP_RATED = "3/movie/top_rated";
+    private final static String MOVIE_REVIEW = "3/movie";
+    private final static String MOVIE_TRAILER = "3/movie";
     private final static String server = "api.themoviedb.org";
     private final static String image_server = "image.tmdb.org";
     private final static String image_path = "t/p/w185";
@@ -27,6 +29,14 @@ public class MoviApp extends Application {
 
     public static String getServer() {
         return server;
+    }
+
+    public static String getMovieReview() {
+        return MOVIE_REVIEW;
+    }
+
+    public static String getMovieTrailer() {
+        return MOVIE_TRAILER;
     }
 
     public static String getImage_server() {

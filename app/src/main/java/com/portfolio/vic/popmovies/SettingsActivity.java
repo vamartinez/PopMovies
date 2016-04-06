@@ -161,7 +161,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         public boolean onOptionsItemSelected(MenuItem item) {
             int id = item.getItemId();
             if (id == android.R.id.home) {
-                Log.e("sdfsd",activity.toString());
                 if (activity != null){
                     Intent returnIntent = new Intent();
                     activity.setResult(Activity.RESULT_OK, returnIntent);

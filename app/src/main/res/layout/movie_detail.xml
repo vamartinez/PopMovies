@@ -22,10 +22,10 @@
         android:paddingRight="@dimen/base_padding">
 
         <ImageView
-            android:layout_margin="@dimen/base_padding"
             android:id="@+id/photoIV"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/base_padding" />
 
         <TextView
             android:id="@+id/yearTV"
@@ -42,21 +42,27 @@
             android:layout_toRightOf="@+id/photoIV" />
 
         <Button
-            android:layout_below="@+id/voteTV"
             android:id="@+id/fabBT"
-            android:textColor="@android:color/darker_gray"
-            android:background="@android:color/holo_blue_bright"
-            android:padding="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/voteTV"
             android:layout_toRightOf="@+id/photoIV"
-            android:text="@string/mark_as_favorite" />
+            android:background="@android:color/holo_blue_bright"
+            android:padding="5dp"
+            android:text="@string/mark_as_favorite"
+            android:textColor="@android:color/darker_gray" />
     </RelativeLayout>
 
     <TextView
-        android:layout_margin="@dimen/base_padding"
         android:id="@+id/descriptionTV"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/base_padding" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/detailRV"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
 
 </LinearLayout>

@@ -25,6 +25,7 @@ import com.raizlabs.android.dbflow.list.FlowCursorList;
 import com.raizlabs.android.dbflow.runtime.FlowContentObserver;
 import com.raizlabs.android.dbflow.sql.language.Delete;
 import com.raizlabs.android.dbflow.sql.language.SQLCondition;
+import com.raizlabs.android.dbflow.sql.language.Select;
 import com.raizlabs.android.dbflow.structure.BaseModel;
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.picasso.Picasso;
@@ -99,11 +100,6 @@ public class MovieListActivity extends AppCompatActivity {
         };
         observer.endTransactionAndNotify();
         observer.addModelChangeListener(modelChangeListener);
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        String genPref = sharedPref.getString(SettingsActivity.KEY_PREF_GENERAL, "");
-        this.prevPreference = genPref;
-        movieService.getMovies(observer, genPref);
-
     }
 
     private void reloadList(final Bundle savedInstanceState) {
@@ -135,8 +131,15 @@ public class MovieListActivity extends AppCompatActivity {
         private FlowCursorList<Movie> mFlowCursorList;
 
         public SimpleItemRecyclerViewAdapter() {
-            if (mFlowCursorList == null)
-                mFlowCursorList = new FlowCursorList<>(true, Movie.class);
+            if (mFlowCursorList == null) {
+                SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                String genPref = sharedPref.getString(SettingsActivity.KEY_PREF_GENERAL, "");
+                if (genPref.equals("2")) {
+                    mFlowCursorList = new FlowCursorList<>(true, Movie.class, Movie_Table.id.in(new Select(Favorite_Table.movi_id).from(Favorite.class).where()));
+                } else {
+                    mFlowCursorList = new FlowCursorList<>(true, Movie.class);
+                }
+            }
         }
 
         @Override
@@ -228,8 +231,13 @@ public class MovieListActivity extends AppCompatActivity {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         String genPref = sharedPref.getString(SettingsActivity.KEY_PREF_GENERAL, "");
         if (!genPref.equals(prevPreference)) {
-            new Delete().from(Movie.class).where().query();
+            if (genPref != "" &&  Integer.valueOf(genPref).equals(2)) {
+                genPref = (prevPreference.equals("0")) ? "1" : "0";
+            } else {
+                new Delete().from(Movie.class).where().query();
+            }
             movieService.getMovies(observer, genPref);
+            this.prevPreference = genPref;
         }
         super.onResume();
     }
